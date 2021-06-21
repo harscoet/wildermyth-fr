@@ -1,4 +1,3 @@
-import { once } from 'events';
 import { createReadStream, ReadStream } from 'fs';
 import { createInterface } from 'readline';
 
@@ -13,6 +12,10 @@ function parseLine(line: string): { key: string; value: string } {
   };
 }
 
+export function serializeProperty(key: string, value: string): string {
+  return `${key}${SEPARATOR}${value}`;
+}
+
 export async function parseFile(
   filePath: string,
   onLine: (property: Property) => Promise<void>,
@@ -24,7 +27,7 @@ export async function parseFile(
     crlfDelay: Infinity,
   });
 
-  rl.on('line', (line) => {
+  for await (const line of rl) {
     const property = parseLine(line);
 
     if (process.env.DEBUG_LINES) {
@@ -34,10 +37,8 @@ export async function parseFile(
       });
     }
 
-    onLine(property);
-  });
-
-  await once(rl, 'close');
+    await onLine(property);
+  }
 }
 
 export interface Property {
