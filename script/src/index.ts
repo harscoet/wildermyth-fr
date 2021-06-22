@@ -1,5 +1,6 @@
 import path from 'path';
 import { once } from 'events';
+import mkdirp from 'mkdirp';
 import { createWriteStream, WriteStream } from 'fs';
 import { parseFile, serializeProperty } from './lib/properties-file-parser';
 import { deepReadAllFiles, isFileExists } from './lib/path-reader';
@@ -43,10 +44,12 @@ async function main() {
       return;
     }
 
+    const parsedTargetFilePath = path.parse(targetFilePath);
+    await mkdirp(parsedTargetFilePath.dir);
     const ws: WriteStream = createWriteStream(targetFilePath);
 
     await parseFile(filePath, async (property) => {
-      if (property.value.startsWith('#')) {
+      if (!property.value || property.value.startsWith('#')) {
         return;
       }
 
