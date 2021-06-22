@@ -31,12 +31,15 @@ async function main() {
       .join(TARGET_DIR_PATH, relativeFilePath)
       .replace('.properties', `_${TARGET_LANGUAGE}.properties`);
 
+    const exists = await isFileExists(targetFilePath);
+
     console.log({
       read: filePath,
-      write: targetFilePath
+      write: targetFilePath,
+      exists
     });
 
-    if (await isFileExists(targetFilePath)) {
+    if (exists) {
       return;
     }
 
